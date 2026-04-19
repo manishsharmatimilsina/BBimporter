@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Analysis{% endblock %}
+
+{% block content %}
+<h1>Donor Analysis - Multi-File Upload</h1>
+
+<div style="background: white; padding: 1.5rem; border-radius: 4px; margin-bottom: 2rem;">
+    <h2>Upload Donor Files</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="benevity"><strong>Benevity</strong></label>
+                <input type="file" id="benevity" name="benevity" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div class="form-group">
+                <label for="fup"><strong>FUP Raw</strong></label>
+                <input type="file" id="fup" name="fup" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div class="form-group">
+                <label for="paypal"><strong>PayPal</strong></label>
+                <input type="file" id="paypal" name="paypal" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div class="form-group">
+                <label for="stripe"><strong>Stripe</strong></label>
+                <input type="file" id="stripe" name="stripe" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div class="form-group">
+                <label for="globalgiving"><strong>GlobalGiving</strong></label>
+                <input type="file" id="globalgiving" name="globalgiving" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div class="form-group">
+                <label for="bb"><strong>BB Import</strong></label>
+                <input type="file" id="bb" name="bb" accept=".csv,.xlsx,.xls">
+            </div>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top: 1rem;">Analyze Files</button>
+    </form>
+</div>
+
+{% if results %}
+    <div style="background: white; padding: 1.5rem; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Analysis Results</h2>
+            <a href="{% url 'analyzer:download_results' %}" class="btn" style="background: #27ae60;">Download CSV</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 0.875rem;">Total Donors</p>
+                <p style="margin: 0; font-size: 1.5rem; font-weight: bold;">{{ results.total_donors }}</p>
+            </div>
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 0.875rem;">Unique Donors</p>
+                <p style="margin: 0; font-size: 1.5rem; font-weight: bold;">{{ results.unique_donors }}</p>
+            </div>
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 0.875rem;">Matched</p>
+                <p style="margin: 0; font-size: 1.5rem; font-weight: bold;">{{ results.matched_donors }}</p>
+            </div>
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 0.875rem;">Unmatched</p>
+                <p style="margin: 0; font-size: 1.5rem; font-weight: bold;">{{ results.unmatched_donors }}</p>
+            </div>
+        </div>
+
+        {% if results.match_rate %}
+            <p><strong>Match Rate:</strong> {{ results.match_rate|floatformat:1 }}%</p>
+        {% endif %}
+
+        {% if results.source_breakdown %}
+            <h3 style="margin-top: 1.5rem;">Source Breakdown</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source, count in results.source_breakdown.items %}
+                        <tr>
+                            <td>{{ source }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if results.unmatched_donors_list %}
+            <h3 style="margin-top: 1.5rem;">Unmatched Donors ({{ results.unmatched_donors_list|length }})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>ZIP</th>
+                        <th>Phone</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donor in results.unmatched_donors_list|slice:":100" %}
+                        <tr>
+                            <td>{{ donor.name }}</td>
+                            <td>{{ donor.email }}</td>
+                            <td>{{ donor.address }}</td>
+                            <td>{{ donor.city }}</td>
+                            <td>{{ donor.state }}</td>
+                            <td>{{ donor.zip }}</td>
+                            <td>{{ donor.phone }}</td>
+                            <td>{{ donor.source }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if results.unmatched_donors_list|length > 100 %}
+                <p style="margin-top: 1rem; color: #666;">Showing 100 of {{ results.unmatched_donors_list|length }} unmatched donors</p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

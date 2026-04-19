@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}New Analysis Session{% endblock %}
+
+{% block content %}
+<h1>Create New Analysis Session</h1>
+
+<form method="post" style="max-width: 600px;">
+    {% csrf_token %}
+    <p>Click the button below to create a new analysis session where you can upload donor files.</p>
+    <button type="submit" class="btn">Create Session</button>
+</form>
+
+<p style="margin-top: 1rem;"><a href="{% url 'analyzer:home' %}">Back to Sessions</a></p>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Session {{ session.session_id }}{% endblock %}
+
+{% block content %}
+<h1>Analysis Session {{ session.session_id }}</h1>
+
+<div style="background: white; padding: 1.5rem; border-radius: 4px; margin-bottom: 2rem;">
+    <h2>Session Details</h2>
+    <p><strong>Status:</strong> <span class="status status-{{ session.status }}">{{ session.get_status_display }}</span></p>
+    <p><strong>Created:</strong> {{ session.created_at|date:"M d, Y g:i A" }}</p>
+    <p><strong>Last Updated:</strong> {{ session.updated_at|date:"M d, Y g:i A" }}</p>
+
+    {% if session.is_complete %}
+        <h3 style="margin-top: 1.5rem;">Results</h3>
+        <p><strong>Total Donors:</strong> {{ session.total_donors }}</p>
+        <p><strong>Unique Donors:</strong> {{ session.unique_donors }}</p>
+        <p><strong>Matched:</strong> {{ session.matched_donors }}</p>
+        <p><strong>Unmatched:</strong> {{ session.unmatched_donors }}</p>
+        <p><strong>Match Rate:</strong> {{ session.match_rate|floatformat:1 }}%</p>
+    {% endif %}
+</div>
+
+<div style="background: white; padding: 1.5rem; border-radius: 4px; margin-bottom: 2rem;">
+    <h2>Upload Files</h2>
+    <p><a href="{% url 'analyzer:upload_file' session.pk %}" class="btn">Upload Files</a></p>
+
+    <h3 style="margin-top: 1.5rem;">Uploaded Files</h3>
+    <ul>
+        {% if session.benevity_file %}<li>✓ Benevity</li>{% else %}<li>○ Benevity</li>{% endif %}
+        {% if session.fup_file %}<li>✓ FUP Raw</li>{% else %}<li>○ FUP Raw</li>{% endif %}
+        {% if session.paypal_file %}<li>✓ PayPal</li>{% else %}<li>○ PayPal</li>{% endif %}
+        {% if session.stripe_file %}<li>✓ Stripe</li>{% else %}<li>○ Stripe</li>{% endif %}
+        {% if session.globalgiving_file %}<li>✓ GlobalGiving</li>{% else %}<li>○ GlobalGiving</li>{% endif %}
+        {% if session.bb_file %}<li>✓ BB</li>{% else %}<li>○ BB</li>{% endif %}
+    </ul>
+</div>
+
+{% if donors %}
+    <div style="background: white; padding: 1.5rem; border-radius: 4px;">
+        <h2>Unmatched Donors ({{ donors.count }})</h2>
+        <table style="margin-top: 1rem;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for donor in donors|slice:":50" %}
+                    <tr>
+                        <td>{{ donor.full_name }}</td>
+                        <td>{{ donor.email }}</td>
+                        <td>{{ donor.get_source_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if donors.count > 50 %}
+            <p style="margin-top: 1rem; color: #666;">Showing 50 of {{ donors.count }} unmatched donors</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<p style="margin-top: 2rem;"><a href="{% url 'analyzer:home' %}">Back to Sessions</a></p>
+{% endblock %}
