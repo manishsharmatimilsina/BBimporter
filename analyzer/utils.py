@@ -140,10 +140,23 @@ def load_and_process_stripe(file_path):
 
 
 def load_bb_emails(file_path):
-    """Load Blackbaud email addresses"""
+    """Load Blackbaud email addresses from both EmailNumber and Email Address columns"""
     try:
         df = pd.read_csv(file_path, encoding='latin1')
-        emails = set(df['Email Address Number'].str.lower().dropna())
+        emails = set()
+
+        # Check Email Address Number column
+        if 'Email Address Number' in df.columns:
+            emails.update(df['Email Address Number'].astype(str).str.lower().dropna())
+
+        # Check Email Address column
+        if 'Email Address' in df.columns:
+            emails.update(df['Email Address'].astype(str).str.lower().dropna())
+
+        # Remove empty strings and 'nan'
+        emails.discard('')
+        emails.discard('nan')
+
         return emails
     except Exception as e:
         logger.error(f"Error loading BB emails: {e}")

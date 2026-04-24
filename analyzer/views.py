@@ -96,30 +96,42 @@ def download_results(request):
     ]
     writer.writerow(headers)
 
+    # Generate date-based ID prefix (MMDDYYYY)
+    now = datetime.now()
+    date_prefix = now.strftime("%m%d%Y")
+
     for i, donor in enumerate(data.get('unmatched_donors_list', [])):
+        import_id_num = f"{i+1:02d}"  # Zero-padded number (01, 02, etc.)
+
+        # Helper to convert NaN-like values to empty string
+        def clean_value(val):
+            if val is None or str(val).lower() in ['nan', 'none', '']:
+                return ''
+            return str(val).strip()
+
         row = [
-            f"13025-{i+1}",  # ImportID
+            f"{date_prefix}-{import_id_num}",  # ImportID: 04242026-01
             'I',  # KeyInd
             '',  # Titl1
-            donor['first_name'],  # FirstName
+            clean_value(donor['first_name']),  # FirstName
             '',  # MidName
-            donor['last_name'],  # LastName
+            clean_value(donor['last_name']),  # LastName
             '',  # OrgName
             '',  # PrimAddID
             '',  # PrimSalID
-            f"A{1000 + i}",  # AddrImpID
-            'Yes',  # PrefAddr
-            'Home',  # AddrType
-            donor['address'],  # AddrLines
-            donor['city'],  # AddrCity
-            donor['state'],  # AddrState
-            donor['zip'],  # AddrZIP
-            f"P{1000 + i}" if donor['phone'] else '',  # PhoneImpID
-            donor['phone'],  # PhoneNum
-            'Home' if donor['phone'] else '',  # PhoneType
-            f"P{2000 + i}",  # PhoneImpID1
-            donor['email'],  # PhoneNum1
-            'Email'  # PhoneType1
+            f"A{date_prefix}-{import_id_num}",  # AddrImpID: A04242026-01
+            'Yes' if clean_value(donor['address']) else '',  # PrefAddr
+            'Home' if clean_value(donor['address']) else '',  # AddrType
+            clean_value(donor['address']),  # AddrLines
+            clean_value(donor['city']),  # AddrCity
+            clean_value(donor['state']),  # AddrState
+            clean_value(donor['zip']),  # AddrZIP
+            f"P{date_prefix}-{import_id_num}" if clean_value(donor['phone']) else '',  # PhoneImpID
+            clean_value(donor['phone']),  # PhoneNum
+            'Home' if clean_value(donor['phone']) else '',  # PhoneType
+            '',  # PhoneImpID1
+            '',  # PhoneNum1
+            ''  # PhoneType1
         ]
         writer.writerow(row)
 
