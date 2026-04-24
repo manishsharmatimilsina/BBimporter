@@ -1,8 +1,19 @@
 import pandas as pd
 from pathlib import Path
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+def clean_value(val):
+    """Convert NaN/None/empty values to empty string"""
+    if pd.isna(val) or val is None:
+        return ''
+    val_str = str(val).strip()
+    if val_str.lower() in ['nan', 'none', '']:
+        return ''
+    return val_str
 
 
 def load_and_process_benevity(file_path):
@@ -13,17 +24,17 @@ def load_and_process_benevity(file_path):
 
         donors = []
         for idx, row in df.iterrows():
-            first_name = str(row.get('Donor First Name', '')).strip()
-            email = str(row.get('Email', '')).strip().lower()
-            if first_name and email and email != 'nan':
+            first_name = clean_value(row.get('Donor First Name', ''))
+            email = clean_value(row.get('Email', '')).lower()
+            if first_name and email:
                 donors.append({
                     'first_name': first_name,
-                    'last_name': str(row.get('Donor Last Name', '')).strip(),
+                    'last_name': clean_value(row.get('Donor Last Name', '')),
                     'email': email,
-                    'address': str(row.get('Address', '')).strip(),
-                    'city': str(row.get('City', '')).strip(),
-                    'state': str(row.get('State/Province', '')).strip(),
-                    'zip': str(row.get('Postal Code', '')).strip(),
+                    'address': clean_value(row.get('Address', '')),
+                    'city': clean_value(row.get('City', '')),
+                    'state': clean_value(row.get('State/Province', '')),
+                    'zip': clean_value(row.get('Postal Code', '')),
                     'phone': '',
                     'source': 'benevity'
                 })
@@ -43,8 +54,8 @@ def load_and_process_fup(file_path):
         for idx, row in df.iterrows():
             if pd.isna(row.get('Supporter Email')):
                 continue
-            first_name = str(row.get('Supporter First Name', '')).strip()
-            last_name = str(row.get('Supporter Last Name', '')).strip()
+            first_name = clean_value(row.get('Supporter First Name', ''))
+            last_name = clean_value(row.get('Supporter Last Name', ''))
 
             if not first_name and not last_name:
                 continue
@@ -52,12 +63,12 @@ def load_and_process_fup(file_path):
             donors.append({
                 'first_name': first_name,
                 'last_name': last_name,
-                'email': str(row.get('Supporter Email', '')).strip().lower(),
-                'address': str(row.get('Mailing Address Line 1', '')).strip(),
-                'city': str(row.get('Mailing City', '')).strip(),
-                'state': str(row.get('Mailing State/Region', '')).strip(),
-                'zip': str(row.get('Mailing Zip/Postal', '')).strip(),
-                'phone': str(row.get('Phone Number', '')).strip(),
+                'email': clean_value(row.get('Supporter Email', '')).lower(),
+                'address': clean_value(row.get('Mailing Address Line 1', '')),
+                'city': clean_value(row.get('Mailing City', '')),
+                'state': clean_value(row.get('Mailing State/Region', '')),
+                'zip': clean_value(row.get('Mailing Zip/Postal', '')),
+                'phone': clean_value(row.get('Phone Number', '')),
                 'source': 'fup'
             })
         return donors
@@ -77,7 +88,7 @@ def load_and_process_paypal(file_path):
             if pd.isna(row.get('From Email Address')):
                 continue
 
-            name = str(row.get('Name', '')).strip()
+            name = clean_value(row.get('Name', ''))
             if not name:
                 continue
 
@@ -88,12 +99,12 @@ def load_and_process_paypal(file_path):
             donors.append({
                 'first_name': first_name,
                 'last_name': last_name,
-                'email': str(row.get('From Email Address', '')).strip().lower(),
-                'address': str(row.get('Address Line 1', '')).strip(),
-                'city': str(row.get('Town/City', '')).strip(),
-                'state': str(row.get('State/Province/Region/County/Territory/Prefecture/Republic', '')).strip(),
-                'zip': str(row.get('Zip/Postal Code', '')).strip(),
-                'phone': str(row.get('Contact Phone Number', '')).strip(),
+                'email': clean_value(row.get('From Email Address', '')).lower(),
+                'address': clean_value(row.get('Address Line 1', '')),
+                'city': clean_value(row.get('Town/City', '')),
+                'state': clean_value(row.get('State/Province/Region/County/Territory/Prefecture/Republic', '')),
+                'zip': clean_value(row.get('Zip/Postal Code', '')),
+                'phone': clean_value(row.get('Contact Phone Number', '')),
                 'source': 'paypal'
             })
         return donors
@@ -114,7 +125,7 @@ def load_and_process_stripe(file_path):
             if pd.isna(row.get('Customer Email')):
                 continue
 
-            name = str(row.get('Customer Description', '')).strip()
+            name = clean_value(row.get('Customer Description', ''))
             if not name:
                 continue
 
@@ -125,7 +136,7 @@ def load_and_process_stripe(file_path):
             donors.append({
                 'first_name': first_name,
                 'last_name': last_name,
-                'email': str(row.get('Customer Email', '')).strip().lower(),
+                'email': clean_value(row.get('Customer Email', '')).lower(),
                 'address': '',
                 'city': '',
                 'state': '',

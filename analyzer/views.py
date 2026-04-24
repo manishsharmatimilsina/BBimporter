@@ -4,7 +4,7 @@ from django.http import HttpResponse
 import tempfile
 import os
 import csv
-from .utils import analyze_donors
+from .utils import analyze_donors, clean_value
 
 
 def home(request):
@@ -102,12 +102,6 @@ def download_results(request):
 
     for i, donor in enumerate(data.get('unmatched_donors_list', [])):
         import_id_num = f"{i+1:02d}"  # Zero-padded number (01, 02, etc.)
-
-        # Helper to convert NaN-like values to empty string
-        def clean_value(val):
-            if val is None or str(val).lower() in ['nan', 'none', '']:
-                return ''
-            return str(val).strip()
 
         row = [
             f"{date_prefix}-{import_id_num}",  # ImportID: 04242026-01
