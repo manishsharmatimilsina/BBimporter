@@ -151,23 +151,35 @@ def load_and_process_stripe(file_path):
 
 
 def load_bb_emails(file_path):
-    """Load Blackbaud email addresses from both EmailNumber and Email Address columns"""
+    """Load Blackbaud email addresses from both Email Number and Email Address columns"""
     try:
         df = pd.read_csv(file_path, encoding='latin1')
         emails = set()
 
-        # Check Email Address Number column
-        if 'Email Address Number' in df.columns:
-            emails.update(df['Email Address Number'].astype(str).str.lower().dropna())
+        # Debug: print column names
+        logger.info(f"BB columns: {df.columns.tolist()}")
+
+        # Check Email Number column (various possible names)
+        for col in ['Email Number', 'Email Numb', 'EmailNumber', 'Email Address Number']:
+            if col in df.columns:
+                logger.info(f"Found email column: {col}")
+                col_emails = df[col].astype(str).str.lower().dropna()
+                emails.update(col_emails)
+                logger.info(f"Added {len(col_emails)} emails from {col}")
 
         # Check Email Address column
-        if 'Email Address' in df.columns:
-            emails.update(df['Email Address'].astype(str).str.lower().dropna())
+        for col in ['Email Address', 'Email Addr', 'EmailAddress']:
+            if col in df.columns:
+                logger.info(f"Found email column: {col}")
+                col_emails = df[col].astype(str).str.lower().dropna()
+                emails.update(col_emails)
+                logger.info(f"Added {len(col_emails)} emails from {col}")
 
         # Remove empty strings and 'nan'
         emails.discard('')
         emails.discard('nan')
 
+        logger.info(f"Total unique BB emails loaded: {len(emails)}")
         return emails
     except Exception as e:
         logger.error(f"Error loading BB emails: {e}")
