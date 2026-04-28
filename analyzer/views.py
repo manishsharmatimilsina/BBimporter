@@ -92,7 +92,7 @@ def download_results(request):
         'ImportID', 'KeyInd', 'Titl1', 'FirstName', 'MidName', 'LastName',
         'OrgName', 'PrimAddID', 'PrimSalID', 'AddrImpID', 'PrefAddr', 'AddrType',
         'AddrLines', 'AddrCity', 'AddrState', 'AddrZIP', 'PhoneImpID', 'PhoneNum',
-        'PhoneType', 'PhoneImpID1', 'PhoneNum1', 'PhoneType1'
+        'PhoneType', 'PhoneImpID', 'PhoneNum', 'PhoneType'
     ]
     writer.writerow(headers)
 
