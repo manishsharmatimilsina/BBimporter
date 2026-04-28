@@ -123,9 +123,9 @@ def download_results(request):
             f"P{date_prefix}-{import_id_num}" if clean_value(donor['phone']) else '',  # PhoneImpID
             clean_value(donor['phone']),  # PhoneNum
             'Home' if clean_value(donor['phone']) else '',  # PhoneType
-            '',  # PhoneImpID1
-            '',  # PhoneNum1
-            ''  # PhoneType1
+            f"P{date_prefix}-{import_id_num}-E" if clean_value(donor['email']) else '',  # PhoneImpID (Email)
+            clean_value(donor['email']),  # PhoneNum (Email Address)
+            'Email' if clean_value(donor['email']) else ''  # PhoneType (Email)
         ]
         writer.writerow(row)
 
