@@ -111,8 +111,8 @@ def download_results(request):
             '',  # MidName
             clean_value(donor['last_name']),  # LastName
             '',  # OrgName
-            '',  # PrimAddID
-            '',  # PrimSalID
+            '3',  # PrimAddID
+            '6',  # PrimSalID
             f"A{date_prefix}-{import_id_num}",  # AddrImpID: A04242026-01
             'Yes' if clean_value(donor['address']) else '',  # PrefAddr
             'Home' if clean_value(donor['address']) else '',  # AddrType
